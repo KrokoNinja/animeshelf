@@ -10,82 +10,60 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Search, Plus, Star, Clock, CheckCircle, BookOpen, Users, TrendingUp, Heart, MessageCircle } from "lucide-react"
 import Image from "next/image"
+import data from "@/lib/data.json"
+import genre from "@/lib/genre.json"
+import AnimeCard from "@/components/animeCard"
+import { Anime } from "@/lib/type"
 
 export default function AnimeShelf() {
-  const [searchQuery, setSearchQuery] = useState("")
 
-  const currentlyWatching = [
+  const currentlyWatching: Anime[] = [
     {
-      id: 1,
-      title: "Attack on Titan",
-      episode: 15,
-      totalEpisodes: 25,
-      image: "/placeholder.svg?height=120&width=80",
-      rating: 4.8,
-      genre: "Action",
-    },
-    {
-      id: 2,
-      title: "Demon Slayer",
-      episode: 8,
-      totalEpisodes: 12,
-      image: "/placeholder.svg?height=120&width=80",
-      rating: 4.9,
-      genre: "Supernatural",
-    },
-    {
-      id: 3,
-      title: "One Piece",
-      episode: 1089,
-      totalEpisodes: null,
-      image: "/placeholder.svg?height=120&width=80",
-      rating: 4.7,
-      genre: "Adventure",
+      "id": data.id,
+      "title": data.attributes.canonicalTitle,
+      "slug": data.attributes.slug,
+      "totalEpisodes": data.attributes.episodeCount,
+      "image": {
+        "link": data.attributes.posterImage.large,
+        "width": data.attributes.posterImage.meta.dimensions.large.width,
+        "height": data.attributes.posterImage.meta.dimensions.large.height,
+      },
+      "rating": Number((Number(data.attributes.averageRating) / 10 / 2).toFixed(1)),
+      "genre": genre,
     },
   ]
 
-  const recentlyCompleted = [
+  const recentlyCompleted: Anime[] = [
     {
-      id: 4,
-      title: "Jujutsu Kaisen",
-      rating: 5,
-      image: "/placeholder.svg?height=120&width=80",
-      completedDate: "2 days ago",
-      genre: "Supernatural",
+      "id": data.id,
+      "title": data.attributes.canonicalTitle,
+      "slug": data.attributes.slug,
+      "totalEpisodes": data.attributes.episodeCount,
+      "image": {
+        "link": data.attributes.posterImage.large,
+        "width": data.attributes.posterImage.meta.dimensions.large.width,
+        "height": data.attributes.posterImage.meta.dimensions.large.height,
+      },
+      "rating": Number(data.attributes.averageRating),
+      "genre": genre,
     },
-    {
-      id: 5,
-      title: "My Hero Academia",
-      rating: 4,
-      image: "/placeholder.svg?height=120&width=80",
-      completedDate: "1 week ago",
-      genre: "Superhero",
-    },
-  ]
+  ];
 
-  const planToWatch = [
+  const planToWatch: Anime[] = [
     {
-      id: 6,
-      title: "Chainsaw Man",
-      image: "/placeholder.svg?height=120&width=80",
-      genre: "Action",
-      episodes: 12,
+      "id": data.id,
+      "title": data.attributes.canonicalTitle,
+      "slug": data.attributes.slug,
+      "totalEpisodes": data.attributes.episodeCount,
+      "image": {
+        "link": data.attributes.posterImage.large,
+        "width": data.attributes.posterImage.meta.dimensions.large.width,
+        "height": data.attributes.posterImage.meta.dimensions.large.height,
+      },
+      "rating": Number(data.attributes.averageRating),
+      "genre": genre,
     },
-    {
-      id: 7,
-      title: "Spy x Family",
-      image: "/placeholder.svg?height=120&width=80",
-      genre: "Comedy",
-      episodes: 25,
-    },
-    {
-      id: 8,
-      title: "Mob Psycho 100",
-      image: "/placeholder.svg?height=120&width=80",
-      genre: "Supernatural",
-      episodes: 37,
-    },
-  ]
+  ];
 
   const socialFeed = [
     {
@@ -112,37 +90,10 @@ export default function AnimeShelf() {
     },
   ]
 
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-primary">AnimeShelf</h1>
-              <div className="relative max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder="Search anime..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 w-80"
-                />
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Anime
-              </Button>
-              <Avatar>
-                <AvatarImage src="/placeholder.svg?height=32&width=32" />
-                <AvatarFallback>YU</AvatarFallback>
-              </Avatar>
-            </div>
-          </div>
-        </div>
-      </header>
+      
 
       <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -206,39 +157,23 @@ export default function AnimeShelf() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {currentlyWatching.map((anime) => (
-                    <div key={anime.id} className="space-y-3">
-                      <div className="relative">
-                        <Image
-                          src={anime.image || "/placeholder.svg"}
-                          alt={anime.title}
-                          width={120}
-                          height={160}
-                          className="rounded-lg object-cover w-full aspect-[3/4]"
-                        />
-                        <Badge className="absolute top-2 right-2" variant="secondary">
-                          {anime.genre}
-                        </Badge>
-                      </div>
-                      <div className="space-y-2">
-                        <h3 className="font-medium text-sm line-clamp-2">{anime.title}</h3>
-                        <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                          <span>{anime.rating}</span>
-                        </div>
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-xs">
-                            <span>Episode {anime.episode}</span>
-                            <span>{anime.totalEpisodes ? `/ ${anime.totalEpisodes}` : "Ongoing"}</span>
+                  {currentlyWatching.map((anime) => {
+                    return (
+                      <div key={anime.id}>
+                        <AnimeCard anime={anime as Anime} />
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-xs">
+                              <span>Episode 0</span>
+                              <span>{anime.totalEpisodes ? `/ ${anime.totalEpisodes}` : "Ongoing"}</span>
+                            </div>
+                            <Progress
+                              value={anime.totalEpisodes ? (0 / anime.totalEpisodes) * 100 : 0}
+                              className="h-1"
+                            />
                           </div>
-                          <Progress
-                            value={anime.totalEpisodes ? (anime.episode / anime.totalEpisodes) * 100 : 0}
-                            className="h-1"
-                          />
                         </div>
-                      </div>
-                    </div>
-                  ))}
+                      )
+                    })}
                 </div>
               </CardContent>
             </Card>
@@ -256,14 +191,14 @@ export default function AnimeShelf() {
                     <div key={anime.id} className="space-y-2">
                       <div className="relative">
                         <Image
-                          src={anime.image || "/placeholder.svg"}
+                          src={anime.image.link || "/placeholder.svg"}
                           alt={anime.title}
                           width={120}
                           height={160}
                           className="rounded-lg object-cover w-full aspect-[3/4]"
                         />
                         <Badge className="absolute top-2 right-2" variant="secondary">
-                          {anime.genre}
+                          {anime.genre[0].name}
                         </Badge>
                       </div>
                       <div className="space-y-1">
@@ -278,7 +213,6 @@ export default function AnimeShelf() {
                             />
                           ))}
                         </div>
-                        <p className="text-xs text-muted-foreground">{anime.completedDate}</p>
                       </div>
                     </div>
                   ))}
@@ -291,19 +225,19 @@ export default function AnimeShelf() {
                     <div key={anime.id} className="space-y-2">
                       <div className="relative">
                         <Image
-                          src={anime.image || "/placeholder.svg"}
+                          src={anime.image.link || "/placeholder.svg"}
                           alt={anime.title}
                           width={120}
                           height={160}
                           className="rounded-lg object-cover w-full aspect-[3/4]"
                         />
                         <Badge className="absolute top-2 right-2" variant="secondary">
-                          {anime.genre}
+                          {anime.genre[0].name}
                         </Badge>
                       </div>
                       <div className="space-y-1">
                         <h3 className="font-medium text-sm line-clamp-2">{anime.title}</h3>
-                        <p className="text-xs text-muted-foreground">{anime.episodes} episodes</p>
+                        <p className="text-xs text-muted-foreground">{anime.totalEpisodes} episodes</p>
                         <Button size="sm" className="w-full text-xs">
                           Start Watching
                         </Button>
