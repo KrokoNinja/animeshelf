@@ -1,19 +1,18 @@
 "use client"
 
-import { useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Search, Plus, Star, Clock, CheckCircle, BookOpen, Users, TrendingUp, Heart, MessageCircle } from "lucide-react"
+import { Star, Clock, CheckCircle, BookOpen, Users, TrendingUp, Heart, MessageCircle } from "lucide-react"
 import Image from "next/image"
 import data from "@/lib/data.json"
 import genre from "@/lib/genre.json"
 import AnimeCard from "@/components/animeCard"
 import { Anime } from "@/lib/type"
+import TrendingAnime from "@/components/TrendingAnime"
 
 export default function AnimeShelf() {
 
@@ -299,34 +298,7 @@ export default function AnimeShelf() {
             </Card>
 
             {/* Trending */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <TrendingUp className="h-5 w-5" />
-                  <span>Trending This Week</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {[
-                  { title: "Frieren: Beyond Journey's End", rating: 4.9 },
-                  { title: "Solo Leveling", rating: 4.8 },
-                  { title: "Dungeon Meshi", rating: 4.7 },
-                ].map((anime, index) => (
-                  <div key={index} className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-sm font-medium">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium line-clamp-1">{anime.title}</p>
-                      <div className="flex items-center space-x-1">
-                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        <span className="text-xs text-muted-foreground">{anime.rating}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+            <TrendingAnime />
           </div>
         </div>
       </div>
