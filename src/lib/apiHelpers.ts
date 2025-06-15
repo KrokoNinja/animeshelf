@@ -17,6 +17,11 @@ export async function getAnime(animePerPage: number = 10, page: number = 1): Pro
       width: anime.attributes.posterImage.meta.dimensions.large.width,
       height: anime.attributes.posterImage.meta.dimensions.large.height,
     },
+    coverImage: {
+      link: anime.attributes.coverImage?.large || "",
+      width: anime.attributes.coverImage?.meta.dimensions.large.width || 0,
+      height: anime.attributes.coverImage?.meta.dimensions.large.height || 0,
+    },
     genre: genres.slice(0, 1),
     rating: Number((Number(anime.attributes.averageRating) / 10 / 2).toFixed(1)),
     }
@@ -28,8 +33,8 @@ export async function getAnime(animePerPage: number = 10, page: number = 1): Pro
   }
 }
 
-export async function getAnimeByName(name: string, numberOfGenres: number = 1): Promise<Anime[]> {
-  const response = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${name}`)
+export async function getAnimeByText(text: string, numberOfGenres: number = 1): Promise<Anime[]> {
+  const response = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${text}`)
   const data = await response.json() as AnimeData
   return Promise.all(data.data.map(async (anime: AnimeResponse) => {
     const genres = await getGenres(anime.id)
@@ -43,12 +48,16 @@ export async function getAnimeByName(name: string, numberOfGenres: number = 1): 
       width: anime.attributes.posterImage.meta.dimensions.large.width,
       height: anime.attributes.posterImage.meta.dimensions.large.height,
     },
+    coverImage: {
+      link: anime.attributes.coverImage?.large || "",
+      width: anime.attributes.coverImage?.meta.dimensions.large.width || 0,
+      height: anime.attributes.coverImage?.meta.dimensions.large.height || 0,
+    },
     genre: genres.slice(0, numberOfGenres),
     rating: Number((Number(anime.attributes.averageRating) / 10 / 2).toFixed(1)),
     }
   }))
 }
-
 
 export async function getGenres(id: string): Promise<AnimeGenre[]> {
   const response = await fetch(`https://kitsu.io/api/edge/anime/${id}/genres`)
@@ -74,6 +83,11 @@ export async function getTrendingAnime(numberOfAnime: number = 3): Promise<Anime
       link: anime.attributes.posterImage.large,
       width: anime.attributes.posterImage.meta.dimensions.large.width,
       height: anime.attributes.posterImage.meta.dimensions.large.height,
+    },
+    coverImage: {
+      link: anime.attributes.coverImage?.large || "",
+      width: anime.attributes.coverImage?.meta.dimensions.large.width || 0,
+      height: anime.attributes.coverImage?.meta.dimensions.large.height || 0,
     },
     genre: genres.slice(0, 1),
     rating: Number((Number(anime.attributes.averageRating) / 10 / 2).toFixed(1)),

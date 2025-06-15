@@ -8,6 +8,11 @@ export interface Anime {
     width: number;
     height: number;
   };
+  coverImage: {
+    link: string;
+    width: number;
+    height: number;
+  };
   genre: AnimeGenre[];
   rating: number;
 }

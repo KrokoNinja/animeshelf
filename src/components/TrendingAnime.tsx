@@ -3,10 +3,22 @@ import { Star } from "lucide-react";
 import { TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { getTrendingAnime } from "@/lib/apiHelpers";
+import { useQuery } from "@tanstack/react-query";
+import { Anime } from "@/lib/type";
 
-export default async function TrendingAnime() {
+export default function TrendingAnime() {
 
-  const trending = await getTrendingAnime()
+  const { data: trending, isPending, error } = useQuery<Anime[]>({
+    queryKey: ["trending"],
+    queryFn: async () => {
+      const trending = await getTrendingAnime()
+      return trending
+    },
+  })
+
+  if (isPending) return <div>Loading...</div>
+  if (error) return <div>Error: {error.message}</div>
+  if (!trending) return <div>No trending anime</div>
 
   return (
     <Card>
@@ -17,7 +29,7 @@ export default async function TrendingAnime() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {trending.map((anime, index) => (
+        {trending && trending.map((anime, index) => (
           <div key={index} className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-sm font-medium">
               {index + 1}

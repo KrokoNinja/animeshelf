@@ -27,6 +27,11 @@ export default function AnimeShelf() {
         "width": data.attributes.posterImage.meta.dimensions.large.width,
         "height": data.attributes.posterImage.meta.dimensions.large.height,
       },
+      "coverImage": {
+        "link": data.attributes.coverImage.large,
+        "width": data.attributes.coverImage.meta.dimensions.large.width,
+        "height": data.attributes.coverImage.meta.dimensions.large.height,
+      },
       "rating": Number((Number(data.attributes.averageRating) / 10 / 2).toFixed(1)),
       "genre": genre,
     },
@@ -43,6 +48,11 @@ export default function AnimeShelf() {
         "width": data.attributes.posterImage.meta.dimensions.large.width,
         "height": data.attributes.posterImage.meta.dimensions.large.height,
       },
+      "coverImage": {
+        "link": data.attributes.coverImage.large,
+        "width": data.attributes.coverImage.meta.dimensions.large.width,
+        "height": data.attributes.coverImage.meta.dimensions.large.height,
+      },
       "rating": Number(data.attributes.averageRating),
       "genre": genre,
     },
@@ -58,6 +68,11 @@ export default function AnimeShelf() {
         "link": data.attributes.posterImage.large,
         "width": data.attributes.posterImage.meta.dimensions.large.width,
         "height": data.attributes.posterImage.meta.dimensions.large.height,
+      },
+      "coverImage": {
+        "link": data.attributes.coverImage.large,
+        "width": data.attributes.coverImage.meta.dimensions.large.width,
+        "height": data.attributes.coverImage.meta.dimensions.large.height,
       },
       "rating": Number(data.attributes.averageRating),
       "genre": genre,
@@ -92,8 +107,6 @@ export default function AnimeShelf() {
 
   return (
     <div className="min-h-screen bg-background">
-      
-
       <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
