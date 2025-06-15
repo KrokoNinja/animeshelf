@@ -4,8 +4,9 @@ import { getAnimeByText } from "@/lib/apiHelpers"
 import { Anime } from "@/lib/type"
 import { useQuery } from "@tanstack/react-query"
 import { useSearchParams } from "next/navigation"
+import { Suspense } from "react"
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams()
   const query = searchParams.get("query")
 
@@ -27,4 +28,12 @@ export default function SearchPage() {
       {anime.map((anime) => <AnimeCard anime={anime} key={anime.id} />)}
     </div>
   </div>
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SearchContent />
+    </Suspense>
+  )
 }
