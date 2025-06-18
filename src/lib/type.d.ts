@@ -1,7 +1,10 @@
 export interface Anime {
   id: string;
   title: string;
+  japaneseTitle: string;
   slug: string;
+  status: string;
+  description: string;
   totalEpisodes: number | null;
   image: {
     link: string;

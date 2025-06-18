@@ -5,27 +5,7 @@ import { Anime, AnimeGenre } from "./type"
 export async function getAnime(animePerPage: number = 10, page: number = 1): Promise<{ data: Anime[], totalCount: number }> {
   const response = await fetch(`https://kitsu.io/api/edge/anime?page[limit]=${animePerPage}&page[offset]=${(page - 1) * animePerPage}`)
   const data = await response.json() as AnimeData
-  const processedAnime = await Promise.all(data.data.map(async (anime: AnimeResponse) => {
-    const genres = await getGenres(anime.id)
-    return {
-    id: anime.id,
-    title: anime.attributes.canonicalTitle,
-    slug: anime.attributes.slug,
-    totalEpisodes: anime.attributes.episodeCount,
-    image: {
-      link: anime.attributes.posterImage.large,
-      width: anime.attributes.posterImage.meta.dimensions.large.width,
-      height: anime.attributes.posterImage.meta.dimensions.large.height,
-    },
-    coverImage: {
-      link: anime.attributes.coverImage?.large || "",
-      width: anime.attributes.coverImage?.meta.dimensions.large.width || 0,
-      height: anime.attributes.coverImage?.meta.dimensions.large.height || 0,
-    },
-    genre: genres.slice(0, 1),
-    rating: Number((Number(anime.attributes.averageRating) / 10 / 2).toFixed(1)),
-    }
-  }))
+  const processedAnime = await getAnimeData(data)
 
   return {
     data: processedAnime,
@@ -36,27 +16,7 @@ export async function getAnime(animePerPage: number = 10, page: number = 1): Pro
 export async function getAnimeByText(text: string, numberOfGenres: number = 1): Promise<Anime[]> {
   const response = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${text}`)
   const data = await response.json() as AnimeData
-  return Promise.all(data.data.map(async (anime: AnimeResponse) => {
-    const genres = await getGenres(anime.id)
-    return {
-    id: anime.id,
-    title: anime.attributes.canonicalTitle,
-    slug: anime.attributes.slug,
-    totalEpisodes: anime.attributes.episodeCount,
-    image: {
-      link: anime.attributes.posterImage.large,
-      width: anime.attributes.posterImage.meta.dimensions.large.width,
-      height: anime.attributes.posterImage.meta.dimensions.large.height,
-    },
-    coverImage: {
-      link: anime.attributes.coverImage?.large || "",
-      width: anime.attributes.coverImage?.meta.dimensions.large.width || 0,
-      height: anime.attributes.coverImage?.meta.dimensions.large.height || 0,
-    },
-    genre: genres.slice(0, numberOfGenres),
-    rating: Number((Number(anime.attributes.averageRating) / 10 / 2).toFixed(1)),
-    }
-  }))
+  return await getAnimeData(data, numberOfGenres)
 }
 
 export async function getGenres(id: string): Promise<AnimeGenre[]> {
@@ -72,13 +32,20 @@ export async function getGenres(id: string): Promise<AnimeGenre[]> {
 export async function getTrendingAnime(numberOfAnime: number = 3): Promise<Anime[]> {
   const response = await fetch(`https://kitsu.io/api/edge/trending/anime?limit=${numberOfAnime}`)
   const data = await response.json() as AnimeData
+  return await getAnimeData(data)
+}
+
+function getAnimeData(data: AnimeData, numberOfGenres: number = 1): Promise<Anime[]> {
   return Promise.all(data.data.map(async (anime: AnimeResponse) => {
     const genres = await getGenres(anime.id)
     return {
     id: anime.id,
     title: anime.attributes.canonicalTitle,
+    japaneseTitle: anime.attributes.titles.ja_jp || "",
     slug: anime.attributes.slug,
-    totalEpisodes: anime.attributes.episodeCount,
+    status: anime.attributes.status,
+    description: anime.attributes.description,
+    totalEpisodes: anime.attributes.episodeCount || null,
     image: {
       link: anime.attributes.posterImage.large,
       width: anime.attributes.posterImage.meta.dimensions.large.width,
@@ -89,7 +56,7 @@ export async function getTrendingAnime(numberOfAnime: number = 3): Promise<Anime
       width: anime.attributes.coverImage?.meta.dimensions.large.width || 0,
       height: anime.attributes.coverImage?.meta.dimensions.large.height || 0,
     },
-    genre: genres.slice(0, 1),
+    genre: genres.slice(0, numberOfGenres),
     rating: Number((Number(anime.attributes.averageRating) / 10 / 2).toFixed(1)),
     }
   }))

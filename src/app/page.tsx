@@ -20,7 +20,10 @@ export default function AnimeShelf() {
     {
       "id": data.id,
       "title": data.attributes.canonicalTitle,
+      "japaneseTitle": data.attributes.titles.ja_jp,
       "slug": data.attributes.slug,
+      "status": data.attributes.status,
+      "description": data.attributes.description,
       "totalEpisodes": data.attributes.episodeCount,
       "image": {
         "link": data.attributes.posterImage.large,
@@ -41,7 +44,10 @@ export default function AnimeShelf() {
     {
       "id": data.id,
       "title": data.attributes.canonicalTitle,
+      "japaneseTitle": data.attributes.titles.ja_jp,
       "slug": data.attributes.slug,
+      "status": data.attributes.status,
+      "description": data.attributes.description,
       "totalEpisodes": data.attributes.episodeCount,
       "image": {
         "link": data.attributes.posterImage.large,
@@ -62,7 +68,10 @@ export default function AnimeShelf() {
     {
       "id": data.id,
       "title": data.attributes.canonicalTitle,
+      "japaneseTitle": data.attributes.titles.ja_jp,
       "slug": data.attributes.slug,
+      "status": data.attributes.status,
+      "description": data.attributes.description,
       "totalEpisodes": data.attributes.episodeCount,
       "image": {
         "link": data.attributes.posterImage.large,
