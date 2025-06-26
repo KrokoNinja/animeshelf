@@ -35,17 +35,17 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {/* Header */}
-        <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <header className="border-b bg-background sticky top-0 z-50">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <Link href="/">
-                  <h1 className="text-2xl font-bold text-primary">AnimeShelf</h1>
+                  <h1 className="text-2xl font-bold text-black">AnimeShelf</h1>
                 </Link>
                 <SearchBar />
               </div>
               <div className="flex items-center space-x-4">
-                <Button variant="outline" size="sm">
+                <Button variant="secondary" size="sm">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Anime
                 </Button>

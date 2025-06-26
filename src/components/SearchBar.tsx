@@ -1,9 +1,10 @@
 "use client"
 import { Search } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button, buttonVariants } from "./ui/button";
 import { Input } from "./ui/input";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 export default function SearchBar() {
 
@@ -22,7 +23,7 @@ export default function SearchBar() {
         placeholder="Search anime..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="pl-10 w-80"
+        className={cn(buttonVariants({ variant: "secondary" }), "pl-10 w-80")}
       />
       <Button type="submit" className="hidden">Search</Button>
     </form>

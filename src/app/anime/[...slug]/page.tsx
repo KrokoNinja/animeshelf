@@ -1,10 +1,11 @@
 "use client"
 import StatusBadge from "@/components/StatusBadge"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { getAnimeByText } from "@/lib/apiHelpers"
 import { Anime } from "@/lib/type"
 import { useQuery } from "@tanstack/react-query"
-import { Star } from "lucide-react"
+import { Play, Plus, Star } from "lucide-react"
 import Image from "next/image"
 import { useParams } from "next/navigation"
 
@@ -41,9 +42,21 @@ export default function AnimePage() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Image and Actions */}
         <div className="lg:col-span-1">
-          <div className="sticky top-24">
-            <div className="max-w-80 rounded-md overflow-hidden">
+          <div className="sticky top-24 max-w-80">
+            {/* Image */}
+            <div className="rounded-md overflow-hidden">
               <Image src={anime.image.link} alt={anime.title} width={anime.image.width} height={anime.image.height} />
+            </div>
+            {/* Actions */}
+            <div className="flex flex-col gap-2 mt-4">
+              <Button variant="default" className="w-full">
+                <Play className="w-4 h-4" />
+                <p className="text-sm">Add watched episodes</p>
+              </Button>
+              <Button variant="secondary" className="w-full">
+                <Plus className="w-4 h-4" />
+                <p className="text-sm">Add to List</p>
+              </Button>
             </div>
           </div>
         </div>
