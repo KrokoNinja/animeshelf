@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import SearchBar from "@/components/SearchBar";
-import { Plus } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { TanstackQueryProvider } from "@/components/providers/TanstackQueryProvider";
+import Header from "@/components/Header";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,36 +27,22 @@ export default function RootLayout({
 }>) {
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* Header */}
-        <header className="border-b bg-background sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Link href="/">
-                  <h1 className="text-2xl font-bold text-black">AnimeShelf</h1>
-                </Link>
-                <SearchBar />
-              </div>
-              <div className="flex items-center space-x-4">
-                <Button variant="secondary" size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Anime
-                </Button>
-                <Avatar>
-                  <AvatarImage src="/placeholder.svg?height=32&width=32" />
-                  <AvatarFallback>YU</AvatarFallback>
-                </Avatar>
-              </div>
-            </div>
-          </div>
-        </header>
-        <TanstackQueryProvider>
-          {children}
-        </TanstackQueryProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TanstackQueryProvider>
+            {/* Header */}
+            <Header />
+            {children}
+          </TanstackQueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
