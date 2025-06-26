@@ -3,7 +3,6 @@ import SearchBar from "./SearchBar";
 import { Button } from "./ui/button";
 import { Plus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Switch } from "./ui/switch";
 import ThemeToggle from "./ThemeToggle";
 
 export default function Header() {
