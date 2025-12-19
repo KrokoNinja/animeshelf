@@ -17,9 +17,11 @@ export default function Header() {
             <SearchBar />
           </div>
           <div className="flex items-center space-x-4">
-            <Button variant="secondary" size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Anime
+            <Button variant="secondary" size="sm" asChild>
+              <Link href="/discover">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Anime
+              </Link>
             </Button>
             <Avatar>
               <AvatarImage src="/placeholder.svg?height=32&width=32" />

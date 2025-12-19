@@ -39,25 +39,27 @@ function getAnimeData(data: AnimeData, numberOfGenres: number = 1): Promise<Anim
   return Promise.all(data.data.map(async (anime: AnimeResponse) => {
     const genres = await getGenres(anime.id)
     return {
-    id: anime.id,
-    title: anime.attributes.canonicalTitle,
-    japaneseTitle: anime.attributes.titles.ja_jp || "",
-    slug: anime.attributes.slug,
-    status: anime.attributes.status,
-    description: anime.attributes.description,
-    totalEpisodes: anime.attributes.episodeCount || null,
-    image: {
-      link: anime.attributes.posterImage.large,
-      width: anime.attributes.posterImage.meta.dimensions.large.width,
-      height: anime.attributes.posterImage.meta.dimensions.large.height,
-    },
-    coverImage: {
-      link: anime.attributes.coverImage?.large || "",
-      width: anime.attributes.coverImage?.meta.dimensions.large.width || 0,
-      height: anime.attributes.coverImage?.meta.dimensions.large.height || 0,
-    },
-    genre: genres.slice(0, numberOfGenres),
-    rating: Number((Number(anime.attributes.averageRating) / 10 / 2).toFixed(1)),
+      id: anime.id,
+      title: anime.attributes.canonicalTitle,
+      japaneseTitle: anime.attributes.titles.ja_jp || "",
+      slug: anime.attributes.slug,
+      status: anime.attributes.status,
+      description: anime.attributes.description,
+      totalEpisodes: anime.attributes.episodeCount || null,
+      image: {
+        link: anime.attributes.posterImage.large,
+        width: anime.attributes.posterImage.meta.dimensions.large.width,
+        height: anime.attributes.posterImage.meta.dimensions.large.height,
+      },
+      coverImage: {
+        link: anime.attributes.coverImage?.large || "",
+        width: anime.attributes.coverImage?.meta.dimensions.large.width || 0,
+        height: anime.attributes.coverImage?.meta.dimensions.large.height || 0,
+      },
+      genre: genres.slice(0, numberOfGenres),
+      rating: Number((Number(anime.attributes.averageRating) / 10 / 2).toFixed(1)),
+      userCount: anime.attributes.userCount,
+      favoritesCount: anime.attributes.favoritesCount,
     }
   }))
 }

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { getAnimeByText } from "@/lib/apiHelpers"
 import { Anime } from "@/lib/type"
 import { useQuery } from "@tanstack/react-query"
-import { Play, Plus, Star } from "lucide-react"
+import { Heart, Play, Plus, Star, User } from "lucide-react"
 import Image from "next/image"
 import { useParams } from "next/navigation"
 
@@ -76,9 +76,19 @@ export default function AnimePage() {
           </div>
           {/* Main Content */}
           <div className="flex flex-col gap-2 mt-8">
-            <div className="flex flex-row gap-1 items-center">
-              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-              <p className="text-sm text-gray-400">{anime.rating} / 5</p>
+            <div className="flex flex-row gap-4 items-center">
+              <div className="flex flex-row gap-1 items-center">
+                <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                <p className="text-sm text-gray-400">{anime.rating} / 5</p>
+              </div>
+              <div className="flex flex-row gap-1 items-center">
+                <User className="w-4 h-4 text-gray-400" />
+                <p className="text-sm text-gray-400">{anime.userCount.toLocaleString()}</p>
+              </div>
+              <div className="flex flex-row gap-1 items-center">
+                <Heart className="w-4 h-4 text-gray-400" />
+                <p className="text-sm text-gray-400">{anime.favoritesCount.toLocaleString()}</p>
+              </div>
             </div>
 
             <p className="text-sm text-gray-400 max-w-xl">{anime.description}</p>

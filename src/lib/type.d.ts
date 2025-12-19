@@ -18,6 +18,8 @@ export interface Anime {
   };
   genre: AnimeGenre[];
   rating: number;
+  userCount: number;
+  favoritesCount: number;
 }
 
 export interface AnimeGenre {
