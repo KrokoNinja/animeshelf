@@ -37,6 +37,8 @@ export default function AnimeShelf() {
       },
       "rating": Number((Number(data.attributes.averageRating) / 10 / 2).toFixed(1)),
       "genre": genre,
+      "favoritesCount": data.attributes.favoritesCount,
+      "userCount": data.attributes.userCount,
     },
   ]
 
@@ -61,6 +63,8 @@ export default function AnimeShelf() {
       },
       "rating": Number(data.attributes.averageRating),
       "genre": genre,
+      "favoritesCount": data.attributes.favoritesCount,
+      "userCount": data.attributes.userCount,
     },
   ];
 
@@ -85,6 +89,8 @@ export default function AnimeShelf() {
       },
       "rating": Number(data.attributes.averageRating),
       "genre": genre,
+      "favoritesCount": data.attributes.favoritesCount,
+      "userCount": data.attributes.userCount,
     },
   ];
 
@@ -180,21 +186,21 @@ export default function AnimeShelf() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {currentlyWatching.map((anime) => {
                     return (
-                      <div key={anime.id}>
+                      <div key={anime.id} className="space-y-2">
                         <AnimeCard anime={anime as Anime} />
-                          <div className="space-y-1">
-                            <div className="flex justify-between text-xs">
-                              <span>Episode 0</span>
-                              <span>{anime.totalEpisodes ? `/ ${anime.totalEpisodes}` : "Ongoing"}</span>
-                            </div>
-                            <Progress
-                              value={anime.totalEpisodes ? (0 / anime.totalEpisodes) * 100 : 0}
-                              className="h-1"
-                            />
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-xs">
+                            <span>Episode 0</span>
+                            <span>{anime.totalEpisodes ? `/ ${anime.totalEpisodes}` : "Ongoing"}</span>
                           </div>
+                          <Progress
+                            value={anime.totalEpisodes ? (0 / anime.totalEpisodes) * 100 : 0}
+                            className="h-1"
+                          />
                         </div>
-                      )
-                    })}
+                      </div>
+                    )
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -228,9 +234,8 @@ export default function AnimeShelf() {
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
-                              className={`h-3 w-3 ${
-                                i < anime.rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"
-                              }`}
+                              className={`h-3 w-3 ${i < anime.rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"
+                                }`}
                             />
                           ))}
                         </div>

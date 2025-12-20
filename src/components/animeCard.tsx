@@ -12,8 +12,8 @@ export default function AnimeCard({ anime }: { anime: Anime }) {
           <Image
             src={anime.image.link}
             alt={anime.title}
-            width={anime.image.width}
-            height={anime.image.height}
+            width={anime.image.width ?? 350}
+            height={anime.image.height ?? 450}
             className="rounded-lg object-cover w-full aspect-[3/4]"
           />
           {
@@ -23,12 +23,14 @@ export default function AnimeCard({ anime }: { anime: Anime }) {
               </Badge>
             )
           }
-        </div>
-        <div className="space-y-2">
-          <h3 className="font-medium text-sm line-clamp-2">{anime.title}</h3>
-          <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-            <span>{anime.rating}</span>
+          {/* Gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent rounded-lg pointer-events-none" />
+          <div className="absolute bottom-2 left-2 z-10">
+            <h3 className="font-medium text-sm line-clamp-2 text-white">{anime.title}</h3>
+            <div className="flex items-center space-x-1 text-xs text-white/80">
+              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+              <span>{anime.rating}</span>
+            </div>
           </div>
         </div>
       </Link>

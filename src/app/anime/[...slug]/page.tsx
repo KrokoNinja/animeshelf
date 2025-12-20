@@ -45,7 +45,7 @@ export default function AnimePage() {
           <div className="sticky top-24 max-w-80">
             {/* Image */}
             <div className="rounded-md overflow-hidden">
-              <Image src={anime.image.link} alt={anime.title} width={anime.image.width} height={anime.image.height} />
+              <Image src={anime.image.link} alt={anime.title} width={anime.image.width ?? 350} height={anime.image.height ?? 450} />
             </div>
             {/* Actions */}
             <div className="flex flex-col gap-2 mt-4">
@@ -68,7 +68,7 @@ export default function AnimePage() {
               <StatusBadge status={anime.status} />
             </div>
             <h2 className="text-xl font-light">{anime.japaneseTitle}</h2>
-            <div className="flex flex-row gap-2">
+            <div className="flex flex-row gap-2 min-h-6">
               {anime.genre.map((genre) => (
                 <Badge key={genre.id} className="bg-white text-black hover:bg-white hover:text-black min-w-fit h-fit">{genre.name}</Badge>
               ))}
