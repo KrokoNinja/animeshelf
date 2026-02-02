@@ -5,7 +5,9 @@ export interface Anime {
   slug: string;
   status: string;
   description: string;
+  synopsis: string;
   totalEpisodes: number | null;
+  episodeLength: number | null;
   image: {
     link: string;
     width: number;
@@ -20,6 +22,16 @@ export interface Anime {
   rating: number;
   userCount: number;
   favoritesCount: number;
+  startDate: string | null;
+  endDate: string | null;
+  ageRating: string;
+  ageRatingGuide: string | null;
+  subtype: string;
+  showType: string;
+  popularityRank: number;
+  ratingRank: number | null;
+  youtubeVideoId: string | null;
+  abbreviatedTitles: string[];
 }
 
 export interface AnimeGenre {
@@ -28,3 +40,12 @@ export interface AnimeGenre {
   slug: string;
 }
 
+export interface Episode {
+  id: string;
+  title: string;
+  episodeNumber: number;
+  seasonNumber: number;
+  synopsis: string;
+  airdate: string;
+  thumbnail: string;
+}

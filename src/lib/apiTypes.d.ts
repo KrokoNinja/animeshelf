@@ -183,3 +183,85 @@ export interface AnimeData {
   meta: AnimeMeta;
   links: AnimeDataLinks;
 }
+
+export interface EpisodeTitles {
+  en_jp?: string;
+  en?: string;
+  ja_jp?: string;
+}
+
+export interface EpisodeThumbnail {
+  original: string;
+  meta: {
+    dimensions: Record<string, unknown>;
+  };
+}
+
+export interface EpisodeAttributes {
+  createdAt: string;
+  updatedAt: string;
+  titles: EpisodeTitles;
+  canonicalTitle: string;
+  seasonNumber: number;
+  number: number;
+  relativeNumber: number;
+  synopsis: string;
+  airdate: string;
+  length: number | null;
+  thumbnail: EpisodeThumbnail;
+}
+
+export interface EpisodeLinks {
+  self: string;
+}
+
+export interface EpisodeRelationships {
+  media: {
+    links: RelationshipLinks;
+  };
+  videos: {
+    links: RelationshipLinks;
+  };
+}
+
+export interface Episode {
+  id: string;
+  type: "episodes";
+  links: EpisodeLinks;
+  attributes: EpisodeAttributes;
+  relationships: EpisodeRelationships;
+}
+
+export interface EpisodeMeta {
+  count: number;
+}
+
+export interface EpisodeDataLinks {
+  first: string;
+  prev?: string;
+  next?: string;
+  last: string;
+}
+
+export interface EpisodeData {
+  data: Episode[];
+  meta: EpisodeMeta;
+  links: EpisodeDataLinks;
+}
+
+export interface ErrorSource {
+  pointer?: string;
+  parameter?: string;
+}
+
+export interface ApiError {
+  title: string;
+  detail: string;
+  code: string;
+  status: string;
+  source?: ErrorSource;
+}
+
+export interface ErrorResponse {
+  errors: ApiError[];
+}
