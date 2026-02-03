@@ -4,6 +4,9 @@ import "./globals.css";
 import { TanstackQueryProvider } from "@/components/providers/TanstackQueryProvider";
 import Header from "@/components/Header";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { ConvexClientProvider } from "@/components/providers/convex-client-provider";
+import { ClerkProvider } from "@clerk/nextjs";
+import UserSync from "@/components/auth/UserSync";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,23 +30,28 @@ export default function RootLayout({
 }>) {
 
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
+    <ClerkProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <TanstackQueryProvider>
-            {/* Header */}
-            <Header />
-            {children}
-          </TanstackQueryProvider>
-        </ThemeProvider>
-      </body>
-    </html>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <TanstackQueryProvider>
+              <ConvexClientProvider>
+                <UserSync />
+                {/* Header */}
+                <Header />
+                {children}
+              </ConvexClientProvider>
+            </TanstackQueryProvider>
+          </ThemeProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

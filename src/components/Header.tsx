@@ -1,9 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import SearchBar from "./SearchBar";
 import { Button } from "./ui/button";
 import { Plus } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import ThemeToggle from "./ThemeToggle";
+import { SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
+import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
+import { Loader2 } from "lucide-react";
 
 export default function Header() {
   return (
@@ -23,10 +27,24 @@ export default function Header() {
                 Add Anime
               </Link>
             </Button>
-            <Avatar>
-              <AvatarImage src="/placeholder.svg?height=32&width=32" />
-              <AvatarFallback>YU</AvatarFallback>
-            </Avatar>
+
+            <Unauthenticated>
+              <SignInButton mode="modal">
+                <Button variant="ghost" size="sm">Sign In</Button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <Button size="sm">Sign Up</Button>
+              </SignUpButton>
+            </Unauthenticated>
+
+            <Authenticated>
+              <UserButton />
+            </Authenticated>
+
+            <AuthLoading>
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </AuthLoading>
+
             <ThemeToggle />
           </div>
         </div>
