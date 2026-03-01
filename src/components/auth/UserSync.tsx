@@ -1,8 +1,8 @@
 "use client";
 
-import { useStoreUserEffect } from "@/hooks/useStoreUserEffect";
+import { useSyncConvexId } from "@/hooks/useSyncConvexId";
 
 export default function UserSync() {
-    useStoreUserEffect();
+    useSyncConvexId();
     return null;
 }

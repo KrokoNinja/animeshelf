@@ -184,6 +184,13 @@ export interface AnimeData {
   links: AnimeDataLinks;
 }
 
+export interface SingleAnimeData {
+  data: Anime;
+  links: {
+    self: string;
+  };
+}
+
 export interface EpisodeTitles {
   en_jp?: string;
   en?: string;

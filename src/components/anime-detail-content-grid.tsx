@@ -2,16 +2,18 @@
 
 import Image from "next/image";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { Check, ChevronDown, Eye, Heart, Info, Plus, Star, User } from "lucide-react";
+import { Check, ChevronDown, Eye, Heart, Info, Loader2, Plus, Star, User } from "lucide-react";
 import { Button } from "./ui/button";
 import StatusBadge from "./StatusBadge";
 import { Badge } from "./ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { Anime, Episode } from "@/lib/type";
-import { useClerk } from "@clerk/nextjs";
-import { useConvexAuth } from "convex/react";
+import { useAuth, useClerk } from "@clerk/nextjs";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 
 import { WatchedEpisodesDialog } from "./watched-episodes-dialog";
+import { api } from "../../convex/_generated/api";
+import { toast } from "sonner";
 
 interface AnimeDetailContentGridProps {
     anime: Anime;
@@ -40,8 +42,17 @@ export default function AnimeDetailContentGrid({
     isDialogOpen,
     onDialogOpenChange
 }: AnimeDetailContentGridProps) {
+    const addToWatchlistMutation = useMutation(api.watchlists.addAnimeToWatchlist);
+    const deleteAnimeFromWatchlistMutation = useMutation(api.watchlists.deleteAnimeFromWatchlist);
     const { isAuthenticated } = useConvexAuth();
+    const { userId } = useAuth();
     const clerk = useClerk();
+    const isAnimeInWatchlistMutation = useQuery(api.watchlists.isAnimeInWatchlist, {
+        user: userId ?? undefined,
+        animeId: anime.id,
+    });
+    const isLoadingWatchlist = isAnimeInWatchlistMutation === undefined;
+    const animeIsInWatchlist = isAnimeInWatchlistMutation?.success ? !!isAnimeInWatchlistMutation.data : false;
 
     const handleAuthCheck = (action: () => void) => {
         if (!isAuthenticated) {
@@ -51,6 +62,37 @@ export default function AnimeDetailContentGrid({
         action();
     };
 
+    const addToWatchlist = () => {
+        addToWatchlistMutation({
+            user: userId ?? undefined,
+            animeId: anime.id,
+            status: "planned",
+        }).then((res) => {
+            if (res.success) {
+                toast.success(res.message);
+            } else {
+                toast.error(res.message);
+            }
+        }).catch(() => {
+            toast.error("Failed to add anime to watchlist");
+        })
+    }
+
+    const deleteFromWatchlist = () => {
+        deleteAnimeFromWatchlistMutation({
+            user: userId ?? undefined,
+            animeId: anime.id,
+        }).then((res) => {
+            if (res.success) {
+                toast.success(res.message);
+            } else {
+                toast.error(res.message);
+            }
+        }).catch(() => {
+            toast.error("Failed to remove anime from watchlist");
+        })
+    }
+
     const handleEpisodeClick = (episodeId: string) => {
         handleAuthCheck(() => {
             if (!watchedEpisodes.includes(episodeId)) {
@@ -59,6 +101,7 @@ export default function AnimeDetailContentGrid({
             onDialogOpenChange(true);
         });
     }
+
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -83,10 +126,24 @@ export default function AnimeDetailContentGrid({
                             <Eye className="w-4 h-4" />
                             <p className="text-sm">Mark watched episodes</p>
                         </Button>
-                        <Button variant="secondary" className="w-full">
-                            <Plus className="w-4 h-4" />
-                            <p className="text-sm">Add to List</p>
-                        </Button>
+                        {isLoadingWatchlist && (
+                            <Button variant="default" className="w-full" disabled>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <p className="text-sm">Loading...</p>
+                            </Button>
+                        )}
+                        {!isLoadingWatchlist && animeIsInWatchlist && (
+                            <Button variant="secondary" className="w-full" onClick={() => handleAuthCheck(() => deleteFromWatchlist())}>
+                                <Heart className="w-4 h-4 fill-red-500 text-red-500" />
+                                <p className="text-sm">Remove from List</p>
+                            </Button>
+                        )}
+                        {!isLoadingWatchlist && !animeIsInWatchlist && (
+                            <Button variant="secondary" className="w-full" onClick={() => handleAuthCheck(() => addToWatchlist())}>
+                                <Plus className="w-4 h-4" />
+                                <p className="text-sm">Add to List</p>
+                            </Button>
+                        )}
                     </div>
                     {/* Community Stats */}
                     <div className="mt-4 bg-secondary/50 rounded-md p-4 flex flex-col gap-3">

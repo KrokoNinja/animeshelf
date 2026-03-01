@@ -4,55 +4,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Star, Clock, CheckCircle, BookOpen, Users, TrendingUp, Heart, MessageCircle } from "lucide-react"
 import Image from "next/image"
 import data from "@/lib/data.json"
 import genre from "@/lib/genre.json"
-import AnimeCard from "@/components/animeCard"
 import { Anime } from "@/lib/type"
 import TrendingAnime from "@/components/TrendingAnime"
+import CurrentlyWatching from "@/components/currently-watching"
+import PlanToWatch from "@/components/plan-to-watch"
 
 export default function AnimeShelf() {
-
-  const currentlyWatching: Anime[] = [
-    {
-      "id": data.id,
-      "title": data.attributes.canonicalTitle,
-      "japaneseTitle": data.attributes.titles.ja_jp,
-      "slug": data.attributes.slug,
-      "status": data.attributes.status,
-      "description": data.attributes.description,
-      "totalEpisodes": data.attributes.episodeCount,
-      "image": {
-        "link": data.attributes.posterImage.large,
-        "width": data.attributes.posterImage.meta.dimensions.large.width,
-        "height": data.attributes.posterImage.meta.dimensions.large.height,
-      },
-      "coverImage": {
-        "link": data.attributes.coverImage.large,
-        "width": data.attributes.coverImage.meta.dimensions.large.width,
-        "height": data.attributes.coverImage.meta.dimensions.large.height,
-      },
-      "rating": Number((Number(data.attributes.averageRating) / 10 / 2).toFixed(1)),
-      "genre": genre,
-      "favoritesCount": data.attributes.favoritesCount,
-      "userCount": data.attributes.userCount,
-      "synopsis": data.attributes.synopsis,
-      "episodeLength": data.attributes.episodeLength,
-      "startDate": data.attributes.startDate,
-      "endDate": data.attributes.endDate,
-      "ageRating": data.attributes.ageRating,
-      "ageRatingGuide": data.attributes.ageRatingGuide,
-      "showType": data.attributes.showType,
-      "youtubeVideoId": data.attributes.youtubeVideoId,
-      "subtype": data.attributes.subtype,
-      "popularityRank": data.attributes.popularityRank,
-      "ratingRank": data.attributes.ratingRank,
-      "abbreviatedTitles": data.attributes.abbreviatedTitles,
-    },
-  ]
 
   const recentlyCompleted: Anime[] = [
     {
@@ -210,39 +172,10 @@ export default function AnimeShelf() {
               </Card>
             </div>
 
-            {/* Currently Watching */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Clock className="h-5 w-5" />
-                  <span>Currently Watching</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {currentlyWatching.map((anime) => {
-                    return (
-                      <div key={anime.id} className="space-y-2">
-                        <AnimeCard anime={anime as Anime} />
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-xs">
-                            <span>Episode 0</span>
-                            <span>{anime.totalEpisodes ? `/ ${anime.totalEpisodes}` : "Ongoing"}</span>
-                          </div>
-                          <Progress
-                            value={anime.totalEpisodes ? (0 / anime.totalEpisodes) * 100 : 0}
-                            className="h-1"
-                          />
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+            <CurrentlyWatching />
 
             {/* Tabs for different lists */}
-            <Tabs defaultValue="completed" className="w-full">
+            <Tabs defaultValue="plantowatch" className="w-full" id="main-anime-tabs">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="completed">Recently Completed</TabsTrigger>
                 <TabsTrigger value="plantowatch">Plan to Watch</TabsTrigger>
@@ -281,33 +214,7 @@ export default function AnimeShelf() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="plantowatch" className="space-y-4">
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {planToWatch.map((anime) => (
-                    <div key={anime.id} className="space-y-2">
-                      <div className="relative">
-                        <Image
-                          src={anime.image.link || "/placeholder.svg"}
-                          alt={anime.title}
-                          width={120}
-                          height={160}
-                          className="rounded-lg object-cover w-full aspect-[3/4]"
-                        />
-                        <Badge className="absolute top-2 right-2" variant="secondary">
-                          {anime.genre[0].name}
-                        </Badge>
-                      </div>
-                      <div className="space-y-1">
-                        <h3 className="font-medium text-sm line-clamp-2">{anime.title}</h3>
-                        <p className="text-xs text-muted-foreground">{anime.totalEpisodes} episodes</p>
-                        <Button size="sm" className="w-full text-xs">
-                          Start Watching
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </TabsContent>
+              <PlanToWatch />
             </Tabs>
           </div>
 

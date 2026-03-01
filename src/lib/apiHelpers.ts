@@ -1,5 +1,5 @@
 import { Genre } from "./apiTypes"
-import { GenreData, Anime as AnimeResponse, AnimeData, ErrorResponse, EpisodeData, Episode as EpisodeResponse } from "./apiTypes"
+import { GenreData, Anime as AnimeResponse, AnimeData, SingleAnimeData, ErrorResponse, EpisodeData, Episode as EpisodeResponse } from "./apiTypes"
 import { Anime, AnimeGenre, Episode } from "./type"
 
 export async function getAnime(animePerPage: number = 10, page: number = 1): Promise<{ data: Anime[], totalCount: number }> {
@@ -17,6 +17,18 @@ export async function getAnime(animePerPage: number = 10, page: number = 1): Pro
     data: processedAnime,
     totalCount: data.meta.count,
   }
+}
+
+export async function getAnimeById(id: string): Promise<Anime[]> {
+  const response = await fetch(`https://kitsu.io/api/edge/anime/${id}`)
+
+  if (!response.ok) {
+    const errorData = await response.json() as ErrorResponse
+    throw new Error(errorData.errors[0]?.detail || 'Failed to fetch anime')
+  }
+
+  const data = await response.json() as SingleAnimeData
+  return await getAnimeData(data)
 }
 
 export async function getAnimeByText(text: string, numberOfGenres: number = 1): Promise<Anime[]> {
@@ -59,8 +71,9 @@ export async function getTrendingAnime(numberOfAnime: number = 3): Promise<Anime
   return await getAnimeData(data)
 }
 
-function getAnimeData(data: AnimeData, numberOfGenres: number = 1): Promise<Anime[]> {
-  return Promise.all(data.data.map(async (anime: AnimeResponse) => {
+function getAnimeData(data: AnimeData | SingleAnimeData, numberOfGenres: number = 1): Promise<Anime[]> {
+  const animeDataArray = Array.isArray(data.data) ? data.data : [data.data]
+  return Promise.all(animeDataArray.map(async (anime: AnimeResponse) => {
     const genres = await getGenres(anime.id)
     return {
       id: anime.id,
