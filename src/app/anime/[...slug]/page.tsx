@@ -1,6 +1,5 @@
 "use client"
-import { getAnimeByText, getEpisodes } from "@/lib/apiHelpers"
-import { Anime, Episode } from "@/lib/type"
+import { catalogQueries } from "@/lib/catalog/queries"
 import { useQuery } from "@tanstack/react-query"
 import { useParams } from "next/navigation"
 import { useState, useMemo } from "react"
@@ -9,29 +8,18 @@ import AnimeDetailContentGrid from "@/components/anime-detail-content-grid"
 
 export default function AnimePage() {
 
-  const params = useParams<{ slug: string }>()
+  const params = useParams<{ slug: string[] }>()
   const slug = params.slug[0]
 
   const [selectedSeason, setSelectedSeason] = useState<number>(1)
   const [watchedEpisodes, setWatchedEpisodes] = useState<string[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-  const { data: anime, isPending, error } = useQuery<Anime | null>({
-    queryKey: ["anime", slug],
-    queryFn: async () => {
-      const anime = await getAnimeByText(slug, -1)
-      return anime.find((anime) => anime.slug === slug) || null
-    },
-  })
+  const { data: anime, isPending, error } = useQuery(catalogQueries.bySlug(slug))
 
-  const { data: episodes = [], isPending: episodesPending } = useQuery<Episode[]>({
-    queryKey: ["episodes", anime?.id],
-    queryFn: async () => {
-      if (!anime?.id) return []
-      return await getEpisodes(anime.id)
-    },
-    enabled: !!anime?.id,
-  })
+  const { data: episodes = [], isPending: episodesPending } = useQuery(
+    catalogQueries.episodes(anime?.id),
+  )
 
   // Get unique seasons
   const seasons = useMemo(() => {
