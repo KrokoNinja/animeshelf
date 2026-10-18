@@ -35,46 +35,8 @@ export default function AnimeShelf() {
         "width": data.attributes.coverImage.meta.dimensions.large.width,
         "height": data.attributes.coverImage.meta.dimensions.large.height,
       },
-      "rating": Number(data.attributes.averageRating),
-      "genre": genre,
-      "favoritesCount": data.attributes.favoritesCount,
-      "userCount": data.attributes.userCount,
-      "synopsis": data.attributes.synopsis,
-      "episodeLength": data.attributes.episodeLength,
-      "startDate": data.attributes.startDate,
-      "endDate": data.attributes.endDate,
-      "ageRating": data.attributes.ageRating,
-      "ageRatingGuide": data.attributes.ageRatingGuide,
-      "showType": data.attributes.showType,
-      "youtubeVideoId": data.attributes.youtubeVideoId,
-      "subtype": data.attributes.subtype,
-      "popularityRank": data.attributes.popularityRank,
-      "ratingRank": data.attributes.ratingRank,
-      "abbreviatedTitles": data.attributes.abbreviatedTitles,
-    },
-  ];
-
-  const planToWatch: Anime[] = [
-    {
-      "id": data.id,
-      "title": data.attributes.canonicalTitle,
-      "japaneseTitle": data.attributes.titles.ja_jp,
-      "slug": data.attributes.slug,
-      "status": data.attributes.status,
-      "description": data.attributes.description,
-      "totalEpisodes": data.attributes.episodeCount,
-      "image": {
-        "link": data.attributes.posterImage.large,
-        "width": data.attributes.posterImage.meta.dimensions.large.width,
-        "height": data.attributes.posterImage.meta.dimensions.large.height,
-      },
-      "coverImage": {
-        "link": data.attributes.coverImage.large,
-        "width": data.attributes.coverImage.meta.dimensions.large.width,
-        "height": data.attributes.coverImage.meta.dimensions.large.height,
-      },
-      "rating": Number(data.attributes.averageRating),
-      "genre": genre,
+      "rating": Number((Number(data.attributes.averageRating) / 20).toFixed(1)),
+      "genres": genre,
       "favoritesCount": data.attributes.favoritesCount,
       "userCount": data.attributes.userCount,
       "synopsis": data.attributes.synopsis,
@@ -194,7 +156,7 @@ export default function AnimeShelf() {
                           className="rounded-lg object-cover w-full aspect-[3/4]"
                         />
                         <Badge className="absolute top-2 right-2" variant="secondary">
-                          {anime.genre[0].name}
+                          {anime.genres[0].name}
                         </Badge>
                       </div>
                       <div className="space-y-1">

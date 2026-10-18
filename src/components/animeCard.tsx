@@ -17,9 +17,9 @@ export default function AnimeCard({ anime }: { anime: Anime }) {
             className="rounded-lg object-cover w-full aspect-[3/4]"
           />
           {
-            anime.genre.length > 0 && (
+            anime.genres.length > 0 && (
               <Badge className="absolute top-2 right-2" variant="secondary">
-                {anime.genre[0].name}
+                {anime.genres[0].name}
               </Badge>
             )
           }

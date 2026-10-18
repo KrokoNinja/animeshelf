@@ -198,7 +198,7 @@ export default function AnimeDetailContentGrid({
 
 
                     <div className="flex flex-row gap-2 min-h-6 flex-wrap">
-                        {anime.genre.map((genre) => (
+                        {anime.genres.map((genre) => (
                             <Badge key={genre.id} className="bg-white text-black hover:bg-white hover:text-black min-w-fit h-fit">{genre.name}</Badge>
                         ))}
                     </div>

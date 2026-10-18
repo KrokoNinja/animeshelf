@@ -18,7 +18,7 @@ export interface Anime {
     width: number;
     height: number;
   };
-  genre: AnimeGenre[];
+  genres: AnimeGenre[];
   rating: number;
   userCount: number;
   favoritesCount: number;

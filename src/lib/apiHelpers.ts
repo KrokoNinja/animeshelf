@@ -95,7 +95,7 @@ function getAnimeData(data: AnimeData | SingleAnimeData, numberOfGenres: number 
         width: anime.attributes.coverImage?.meta.dimensions.large.width || 0,
         height: anime.attributes.coverImage?.meta.dimensions.large.height || 0,
       },
-      genre: genres.slice(0, numberOfGenres),
+      genres: genres.slice(0, numberOfGenres),
       rating: Number((Number(anime.attributes.averageRating) / 10 / 2).toFixed(1)),
       userCount: anime.attributes.userCount,
       favoritesCount: anime.attributes.favoritesCount,

@@ -51,7 +51,7 @@ export default function PlanToWatch() {
                                     className="rounded-lg object-cover w-full aspect-[3/4]"
                                 />
                                 <Badge className="absolute top-2 right-2" variant="secondary">
-                                    {anime.genre[0]?.name || "Anime"}
+                                    {anime.genres[0]?.name || "Anime"}
                                 </Badge>
                             </div>
                             <div className="space-y-1">
