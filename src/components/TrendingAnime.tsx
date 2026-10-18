@@ -1,20 +1,11 @@
-import { Star } from "lucide-react";
-
-import { TrendingUp } from "lucide-react";
+import { Star, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { getTrendingAnime } from "@/lib/apiHelpers";
+import { catalogQueries } from "@/lib/catalog/queries";
 import { useQuery } from "@tanstack/react-query";
-import { Anime } from "@/lib/type";
 
 export default function TrendingAnime() {
 
-  const { data: trending, isPending, error } = useQuery<Anime[]>({
-    queryKey: ["trending"],
-    queryFn: async () => {
-      const trending = await getTrendingAnime()
-      return trending
-    },
-  })
+  const { data: trending, isPending, error } = useQuery(catalogQueries.trending(3))
 
   if (isPending) return <div>Loading...</div>
   if (error) return <div>Error: {error.message}</div>
