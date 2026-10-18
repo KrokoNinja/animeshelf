@@ -1,4 +1,4 @@
-export type CatalogErrorKind = "network" | "upstream" | "decode";
+export type CatalogErrorKind = "network" | "kitsu" | "decode";
 
 export interface CatalogErrorOptions {
   status?: number;

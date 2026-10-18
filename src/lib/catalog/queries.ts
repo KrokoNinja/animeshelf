@@ -26,13 +26,6 @@ export const catalogQueries = {
       ...defaults,
     }),
 
-  byId: (id: string) =>
-    queryOptions({
-      queryKey: ["catalog", "anime", "id", id] as const,
-      queryFn: () => catalog.byId(id),
-      ...defaults,
-    }),
-
   bySlug: (slug: string) =>
     queryOptions({
       queryKey: ["catalog", "anime", "slug", slug] as const,
@@ -47,7 +40,7 @@ export const catalogQueries = {
       ...defaults,
     }),
 
-  trending: (limit = 3) =>
+  trending: (limit: number) =>
     queryOptions({
       queryKey: ["catalog", "trending", limit] as const,
       queryFn: () => catalog.trending(limit),

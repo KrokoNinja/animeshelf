@@ -81,7 +81,7 @@ export interface KitsuSingleResponse<T> {
 
 const DEFAULT_POSTER = { width: 550, height: 780 };
 
-export function normalizeRating(averageRating: string | null): number {
+function normalizeRating(averageRating: string | null): number {
   const rating = Number(averageRating);
   return Number.isFinite(rating)
     ? Number((rating / 20).toFixed(1))
@@ -208,7 +208,7 @@ export async function readJson<T>(response: Response): Promise<T> {
       // Keep the status message when the error body is not JSON.
     }
 
-    throw new CatalogError("upstream", detail, { status: response.status });
+    throw new CatalogError("kitsu", detail, { status: response.status });
   }
 
   try {

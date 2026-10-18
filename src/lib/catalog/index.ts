@@ -1,4 +1,5 @@
 import type { Anime, Episode } from "../type";
+import { CatalogError } from "./errors";
 import {
   decodeAnime,
   decodeAnimeList,
@@ -18,22 +19,57 @@ export { CatalogError } from "./errors";
 export type { CatalogErrorKind } from "./errors";
 
 const BASE_URL = "https://kitsu.io/api/edge";
+const BATCH_SIZE = 20;
+const EPISODE_PAGE_SIZE = 20;
+const EPISODE_CAP = 500;
+const DECODE_ERROR_MESSAGE = "Kitsu returned an invalid response";
 
 export interface CatalogOptions {
   fetch: FetchLike;
 }
 
+export interface CatalogPage {
+  items: Anime[];
+  totalCount: number;
+}
+
 export interface Catalog {
   search(text: string): Promise<Anime[]>;
-  page(
-    page: number,
-    perPage: number,
-  ): Promise<{ items: Anime[]; totalCount: number }>;
+  page(page: number, perPage: number): Promise<CatalogPage>;
   byId(id: string): Promise<Anime | null>;
   bySlug(slug: string): Promise<Anime | null>;
   byIds(ids: string[]): Promise<Anime[]>;
-  trending(limit?: number): Promise<Anime[]>;
+  trending(limit: number): Promise<Anime[]>;
   episodes(animeId: string): Promise<Episode[]>;
+}
+
+async function decodeRead<T>(read: () => Promise<T>): Promise<T> {
+  try {
+    return await read();
+  } catch (error) {
+    if (error instanceof CatalogError) {
+      throw error;
+    }
+
+    throw new CatalogError("decode", DECODE_ERROR_MESSAGE, { cause: error });
+  }
+}
+
+async function readListPage(
+  fetcher: FetchLike,
+  url: string,
+): Promise<CatalogPage> {
+  return decodeRead(async () => {
+    const payload = await fetchJson<KitsuListResponse<KitsuAnimeResource>>(
+      fetcher,
+      url,
+    );
+
+    return {
+      items: decodeAnimeList(payload),
+      totalCount: payload.meta?.count ?? 0,
+    };
+  });
 }
 
 export function createCatalog({ fetch }: CatalogOptions): Catalog {
@@ -43,19 +79,21 @@ export function createCatalog({ fetch }: CatalogOptions): Catalog {
     }
 
     const uniqueIds = [...new Set(ids)];
-    const url = `${BASE_URL}/anime?filter[id]=${uniqueIds.map(encodeURIComponent).join(",")}&include=genres&page[limit]=${uniqueIds.length}`;
-    const payload = await fetchJson<KitsuListResponse<KitsuAnimeResource>>(
-      fetch,
-      url,
-    );
-    const included = payload.included ?? [];
-    const resources = new Map(
-      payload.data.map((resource) => [resource.id, resource]),
-    );
+    const animeById = new Map<string, Anime>();
+
+    for (let start = 0; start < uniqueIds.length; start += BATCH_SIZE) {
+      const chunk = uniqueIds.slice(start, start + BATCH_SIZE);
+      const url = `${BASE_URL}/anime?filter[id]=${chunk.map(encodeURIComponent).join(",")}&include=genres&page[limit]=${chunk.length}`;
+      const { items } = await readListPage(fetch, url);
+
+      for (const entry of items) {
+        animeById.set(entry.id, entry);
+      }
+    }
 
     return ids.flatMap((id) => {
-      const resource = resources.get(id);
-      return resource ? [decodeAnime(resource, included)] : [];
+      const entry = animeById.get(id);
+      return entry ? [entry] : [];
     });
   };
 
@@ -67,97 +105,89 @@ export function createCatalog({ fetch }: CatalogOptions): Catalog {
       }
 
       const url = `${BASE_URL}/anime?filter[text]=${encodeURIComponent(query)}&include=genres`;
-      const payload = await fetchJson<KitsuListResponse<KitsuAnimeResource>>(
-        fetch,
-        url,
-      );
-      return decodeAnimeList(payload);
+      const { items } = await readListPage(fetch, url);
+      return items;
     },
 
-    async page(
-      page: number,
-      perPage: number,
-    ): Promise<{ items: Anime[]; totalCount: number }> {
+    async page(page: number, perPage: number): Promise<CatalogPage> {
       const safePage = Math.max(1, Math.floor(page));
       const safePerPage = Math.max(1, Math.floor(perPage));
       const offset = (safePage - 1) * safePerPage;
       const url = `${BASE_URL}/anime?page[limit]=${safePerPage}&page[offset]=${offset}&include=genres`;
-      const payload = await fetchJson<KitsuListResponse<KitsuAnimeResource>>(
-        fetch,
-        url,
-      );
-
-      return {
-        items: decodeAnimeList(payload),
-        totalCount: payload.meta?.count ?? 0,
-      };
+      return readListPage(fetch, url);
     },
 
     async byId(id: string): Promise<Anime | null> {
       const url = `${BASE_URL}/anime/${encodeURIComponent(id)}?include=genres`;
-      const response = await request(fetch, url);
 
-      if (response.status === 404) {
-        return null;
-      }
+      return decodeRead(async () => {
+        const response = await request(fetch, url);
 
-      const payload = await readJson<KitsuSingleResponse<KitsuAnimeResource>>(
-        response,
-      );
+        if (response.status === 404) {
+          return null;
+        }
 
-      return decodeAnime(payload.data, payload.included ?? []);
+        const payload = await readJson<KitsuSingleResponse<KitsuAnimeResource>>(
+          response,
+        );
+
+        return decodeAnime(payload.data, payload.included ?? []);
+      });
     },
 
     async bySlug(slug: string): Promise<Anime | null> {
-      const url = `${BASE_URL}/anime?filter[slug]=${encodeURIComponent(slug)}&include=genres`;
-      const payload = await fetchJson<KitsuListResponse<KitsuAnimeResource>>(
-        fetch,
-        url,
-      );
-      const resource = payload.data[0];
+      const query = slug.trim();
+      if (!query) {
+        return null;
+      }
 
-      return resource
-        ? decodeAnime(resource, payload.included ?? [])
-        : null;
+      const url = `${BASE_URL}/anime?filter[slug]=${encodeURIComponent(query)}&include=genres`;
+      const { items } = await readListPage(fetch, url);
+      return items[0] ?? null;
     },
 
     byIds,
 
-    async trending(limit = 3): Promise<Anime[]> {
+    async trending(limit: number): Promise<Anime[]> {
       const safeLimit = Math.max(1, Math.floor(limit));
-      const payload = await fetchJson<{ data: { id: string }[] }>(
-        fetch,
-        `${BASE_URL}/trending/anime?limit=${safeLimit}`,
-      );
+      const ids = await decodeRead(async () => {
+        const payload = await fetchJson<{ data: { id: string }[] }>(
+          fetch,
+          `${BASE_URL}/trending/anime?limit=${safeLimit}`,
+        );
 
-      return byIds(payload.data.map((entry) => entry.id));
+        return payload.data.map((entry) => entry.id);
+      });
+
+      return byIds(ids);
     },
 
     async episodes(animeId: string): Promise<Episode[]> {
-      const episodes: Episode[] = [];
-      const limit = 20;
-      let offset = 0;
+      return decodeRead(async () => {
+        const episodes: Episode[] = [];
+        let offset = 0;
 
-      while (true) {
-        const url = `${BASE_URL}/anime/${encodeURIComponent(animeId)}/episodes?page[limit]=${limit}&page[offset]=${offset}`;
-        const payload = await fetchJson<{
-          data: KitsuEpisodeResource[];
-          links?: { next?: string };
-        }>(fetch, url);
+        while (true) {
+          const url = `${BASE_URL}/anime/${encodeURIComponent(animeId)}/episodes?page[limit]=${EPISODE_PAGE_SIZE}&page[offset]=${offset}`;
+          const payload = await fetchJson<{
+            data: KitsuEpisodeResource[];
+            links?: { next?: string };
+          }>(fetch, url);
 
-        episodes.push(...payload.data.map(decodeEpisode));
+          episodes.push(...payload.data.map(decodeEpisode));
 
-        if (!payload.links?.next) {
-          break;
+          if (!payload.links?.next) {
+            break;
+          }
+
+          offset += EPISODE_PAGE_SIZE;
+          if (offset >= EPISODE_CAP) {
+            break;
+          }
         }
 
-        offset += limit;
-        if (offset >= 500) {
-          break;
-        }
-      }
-
-      return episodes;
+        return episodes;
+      });
     },
   };
 }

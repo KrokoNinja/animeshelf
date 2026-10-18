@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CatalogError, createCatalog } from "@/lib/catalog";
+import { CatalogError, createCatalog, type Catalog } from "@/lib/catalog";
 
 const jsonResponse = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -150,6 +150,7 @@ describe("catalog.search", () => {
     expect(calls).toHaveLength(1);
     expect(calls[0]).toContain("filter[text]=cowboy");
     expect(calls[0]).toContain("include=genres");
+    expect(calls[0]).not.toContain("page[");
   });
 
   it("trims and encodes the query, and skips the request for empty text", async () => {
@@ -262,9 +263,12 @@ describe("catalog.page", () => {
 
 describe("catalog.byId", () => {
   it("returns the decoded Anime with its Genres", async () => {
+    const calls: string[] = [];
     const catalog = createCatalog({
-      fetch: async () =>
-        jsonResponse({ data: anime(), included: [genre] }),
+      fetch: async (url) => {
+        calls.push(String(url));
+        return jsonResponse({ data: anime(), included: [genre] });
+      },
     });
 
     const result = await catalog.byId("1");
@@ -273,6 +277,7 @@ describe("catalog.byId", () => {
     expect(result?.genres).toEqual([
       { id: "1", name: "Action", slug: "action" },
     ]);
+    expect(calls[0]).toContain("include=genres");
   });
 
   it("returns null when the Anime does not exist", async () => {
@@ -315,6 +320,7 @@ describe("catalog.bySlug", () => {
 
     expect(result?.slug).toBe("cowboy-bebop");
     expect(calls[0]).toContain("filter[slug]=cowboy-bebop");
+    expect(calls[0]).toContain("include=genres");
     expect(calls[0]).not.toContain("filter[text]");
   });
 
@@ -324,6 +330,20 @@ describe("catalog.bySlug", () => {
     });
 
     expect(await catalog.bySlug("missing")).toBeNull();
+  });
+
+  it("returns null without a request for an empty or whitespace-only slug", async () => {
+    const calls: string[] = [];
+    const catalog = createCatalog({
+      fetch: async (url) => {
+        calls.push(String(url));
+        return jsonResponse({ data: [] });
+      },
+    });
+
+    expect(await catalog.bySlug("")).toBeNull();
+    expect(await catalog.bySlug("   ")).toBeNull();
+    expect(calls).toHaveLength(0);
   });
 });
 
@@ -373,6 +393,78 @@ describe("catalog.byIds", () => {
 
     expect(await catalog.byIds([])).toEqual([]);
     expect(calls).toHaveLength(0);
+  });
+
+  it("splits more than 20 ids into chunked requests and merges caller order", async () => {
+    const ids = Array.from({ length: 25 }, (_, index) => String(index + 1));
+    const calls: string[] = [];
+    const catalog = createCatalog({
+      fetch: async (url) => {
+        const call = String(url);
+        calls.push(call);
+        const requested =
+          call.match(/filter\[id\]=([^&]+)/)?.[1]?.split(",") ?? [];
+
+        return jsonResponse({
+          data: requested
+            .filter((id) => id !== "3")
+            .reverse()
+            .map((id) =>
+              anime(
+                {
+                  canonicalTitle: `Anime ${id}`,
+                  slug: `anime-${id}`,
+                  titles: { en: `Anime ${id}` },
+                },
+                id,
+              ),
+            ),
+          included: [genre],
+          meta: { count: requested.length },
+        });
+      },
+    });
+
+    const results = await catalog.byIds(ids);
+
+    expect(results.map((entry) => entry.id)).toEqual(
+      ids.filter((id) => id !== "3"),
+    );
+    expect(calls).toHaveLength(2);
+    expect(calls[0]).toContain(`filter[id]=${ids.slice(0, 20).join(",")}`);
+    expect(calls[0]).toContain("page[limit]=20");
+    expect(calls[1]).toContain(`filter[id]=${ids.slice(20).join(",")}`);
+    expect(calls[1]).toContain("page[limit]=5");
+  });
+
+  it("keeps duplicate caller ids while deduplicating the request", async () => {
+    const calls: string[] = [];
+    const catalog = createCatalog({
+      fetch: async (url) => {
+        calls.push(String(url));
+        return jsonResponse({
+          data: [
+            anime(),
+            anime(
+              {
+                canonicalTitle: "Trigun",
+                slug: "trigun",
+                titles: { en: "Trigun" },
+              },
+              "2",
+            ),
+          ],
+          included: [genre],
+          meta: { count: 2 },
+        });
+      },
+    });
+
+    const results = await catalog.byIds(["2", "1", "2"]);
+
+    expect(results.map((entry) => entry.id)).toEqual(["2", "1", "2"]);
+    expect(calls[0]).toContain("filter[id]=2,1");
+    expect(calls[0]).toContain("page[limit]=2");
   });
 });
 
@@ -488,7 +580,7 @@ describe("catalog errors", () => {
     });
   });
 
-  it("wraps an upstream failure with its status and detail", async () => {
+  it("wraps a Kitsu failure with its status and detail", async () => {
     const catalog = createCatalog({
       fetch: async () =>
         jsonResponse(
@@ -512,7 +604,7 @@ describe("catalog errors", () => {
 
     expect(error).toBeInstanceOf(CatalogError);
     expect(error).toMatchObject({
-      kind: "upstream",
+      kind: "kitsu",
       status: 500,
       message: "boom",
     });
@@ -527,4 +619,52 @@ describe("catalog errors", () => {
       kind: "decode",
     });
   });
+
+  it("wraps a malformed Anime shape as a decode Catalog error", async () => {
+    const catalog = createCatalog({
+      fetch: async () =>
+        jsonResponse({
+          data: [{ id: "1", type: "anime", attributes: null }],
+        }),
+    });
+
+    await expect(catalog.search("cowboy")).rejects.toMatchObject({
+      name: "CatalogError",
+      kind: "decode",
+    });
+  });
+
+  it("wraps a malformed Episode shape as a decode Catalog error", async () => {
+    const catalog = createCatalog({
+      fetch: async () =>
+        jsonResponse({ data: [{ id: "1", attributes: null }] }),
+    });
+
+    await expect(catalog.episodes("1")).rejects.toMatchObject({
+      name: "CatalogError",
+      kind: "decode",
+    });
+  });
+
+  it.each<[string, (catalog: Catalog) => Promise<unknown>]>([
+    ["search", (catalog) => catalog.search("cowboy")],
+    ["page", (catalog) => catalog.page(1, 10)],
+    ["byId", (catalog) => catalog.byId("1")],
+    ["bySlug", (catalog) => catalog.bySlug("cowboy-bebop")],
+    ["byIds", (catalog) => catalog.byIds(["1"])],
+    ["trending", (catalog) => catalog.trending(2)],
+    ["episodes", (catalog) => catalog.episodes("1")],
+  ])(
+    "wraps a malformed %s container as a decode Catalog error",
+    async (_name, read) => {
+      const catalog = createCatalog({
+        fetch: async () => jsonResponse({ data: null }),
+      });
+
+      await expect(read(catalog)).rejects.toMatchObject({
+        name: "CatalogError",
+        kind: "decode",
+      });
+    },
+  );
 });
