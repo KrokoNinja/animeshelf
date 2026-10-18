@@ -3,38 +3,27 @@
 import Image from "next/image";
 import { TabsContent } from "./ui/tabs";
 import { Badge } from "./ui/badge";
-import { Anime } from "@/lib/type";
-import { useQuery } from "convex/react";
+import { useQuery as useConvexQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
-import { getAnimeById } from "@/lib/apiHelpers";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { catalogQueries } from "@/lib/catalog/queries";
 import Link from "next/link";
 
 export default function PlanToWatch() {
-    const [planToWatch, setPlanToWatch] = useState<Anime[]>([]);
     const { user } = useUser();
 
-    const getWatchlist = useQuery(api.watchlists.getWatchlists, {
+    const getWatchlist = useConvexQuery(api.watchlists.getWatchlists, {
         status: "planned",
         user: user?.id ?? "",
     });
 
-    useEffect(() => {
-        const fetchAnime = async () => {
-            if (getWatchlist?.success && getWatchlist.data) {
-                const animeData = await Promise.all(
-                    getWatchlist.data.map(async (watchlist) => {
-                        const anime = await getAnimeById(watchlist.animeId)
-                        return anime ? anime[0] : null
-                    })
-                );
-                setPlanToWatch(animeData.filter((a): a is Anime => a !== null));
-            }
-        };
+    const animeIds =
+        getWatchlist?.success && getWatchlist.data
+            ? getWatchlist.data.map((watchlist) => watchlist.animeId)
+            : [];
 
-        fetchAnime();
-    }, [getWatchlist]);
+    const { data: planToWatch = [] } = useQuery(catalogQueries.byIds(animeIds));
 
     return (
         <TabsContent value="plantowatch" className="space-y-4">

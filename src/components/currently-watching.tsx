@@ -1,6 +1,5 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { Clock } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import AnimeCard from "./animeCard"
@@ -8,29 +7,12 @@ import { Progress } from "./ui/progress"
 import { Anime } from "@/lib/type"
 import useUserProgress from "@/hooks/useUserProgress"
 import { Spinner } from "./ui/spinner"
-import { getAnimeById } from "@/lib/apiHelpers"
 import NothingWatching from "./nothing-watching"
 import { cn } from "@/lib/utils"
+import { useQuery } from "@tanstack/react-query"
+import { catalogQueries } from "@/lib/catalog/queries"
 
-function CurrentlyWatchingItem({ animeId, currentEpisode }: { animeId: string; currentEpisode: number }) {
-    const [anime, setAnime] = useState<Anime | null>(null)
-
-    useEffect(() => {
-        let cancelled = false
-        getAnimeById(animeId)
-            .then(([result]) => {
-                if (!cancelled) setAnime(result ?? null)
-            })
-            .catch(() => {
-                if (!cancelled) setAnime(null)
-            })
-        return () => {
-            cancelled = true
-        }
-    }, [animeId])
-
-    if (!anime) return null
-
+function CurrentlyWatchingItem({ anime, currentEpisode }: { anime: Anime; currentEpisode: number }) {
     return (
         <div className="space-y-2">
             <AnimeCard anime={anime} />
@@ -51,6 +33,15 @@ function CurrentlyWatchingItem({ animeId, currentEpisode }: { animeId: string; c
 export default function CurrentlyWatching() {
     const { isLoading, isAuthenticated, progress } = useUserProgress()
     const entries = progress ?? []
+    const { data: animeList = [], isPending: isAnimePending } = useQuery(
+        catalogQueries.byIds(entries.map((entry) => entry.animeId)),
+    )
+
+    const animeById = new Map(animeList.map((anime) => [anime.id, anime]))
+    const watchingItems = entries.flatMap((entry) => {
+        const anime = animeById.get(entry.animeId)
+        return anime ? [{ entry, anime }] : []
+    })
 
     return (
         <Card>
@@ -61,18 +52,18 @@ export default function CurrentlyWatching() {
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4", entries.length === 0 && "flex items-center justify-center")}>
-                    {isLoading ? (
+                <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4", watchingItems.length === 0 && "flex items-center justify-center")}>
+                    {isLoading || (entries.length > 0 && isAnimePending) ? (
                         <Spinner />
                     ) : !isAuthenticated ? (
                         <div>Sign in to see your currently watching</div>
-                    ) : entries.length === 0 ? (
+                    ) : watchingItems.length === 0 ? (
                         <NothingWatching />
                     ) : (
-                        entries.map((entry) => (
+                        watchingItems.map(({ entry, anime }) => (
                             <CurrentlyWatchingItem
                                 key={entry._id}
-                                animeId={entry.animeId}
+                                anime={anime}
                                 currentEpisode={entry.currentEpisode}
                             />
                         ))
