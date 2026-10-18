@@ -4,17 +4,24 @@ import { api } from "../../convex/_generated/api"
 import { Id } from "../../convex/_generated/dataModel"
 
 export default function useUserProgress() {
-    const { isLoading, isAuthenticated } = useConvexAuth()
+    const { isLoading: isAuthLoading, isAuthenticated } = useConvexAuth()
     const { user } = useUser()
-    console.log(user)
-    const userId = user?.unsafeMetadata.convexId as Id<"users">
-    console.log(userId)
 
-    const getProgress = useQuery(api.progress.getProgress, { userId: userId })
+    // The Convex user id is written to Clerk's unsafe metadata by useSyncConvexId.
+    // Until that has happened there is no user to look up, and passing an object
+    // whose only field is `undefined` serializes to `{}`, which fails the server's
+    // required `v.id("users")` validator. Skip the query instead.
+    const convexId = user?.unsafeMetadata?.convexId
+    const convexUserId = typeof convexId === "string" ? (convexId as Id<"users">) : undefined
+
+    const progress = useQuery(
+        api.progress.getProgress,
+        isAuthenticated && convexUserId ? { userId: convexUserId } : "skip"
+    )
 
     return {
-        isLoading,
+        isLoading: isAuthLoading || (isAuthenticated && progress === undefined),
         isAuthenticated,
-        progress: getProgress
+        progress,
     }
 }
