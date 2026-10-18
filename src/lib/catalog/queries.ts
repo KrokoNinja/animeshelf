@@ -1,4 +1,4 @@
-import { queryOptions } from "@tanstack/react-query";
+import { queryOptions, skipToken } from "@tanstack/react-query";
 import { catalog } from "./index";
 
 const CATALOG_STALE_TIME = 5 * 60 * 1000;
@@ -54,10 +54,10 @@ export const catalogQueries = {
       ...defaults,
     }),
 
-  episodes: (animeId: string) =>
+  episodes: (animeId?: string) =>
     queryOptions({
-      queryKey: ["catalog", "episodes", animeId] as const,
-      queryFn: () => catalog.episodes(animeId),
+      queryKey: ["catalog", "episodes", animeId ?? null] as const,
+      queryFn: animeId ? () => catalog.episodes(animeId) : skipToken,
       ...defaults,
     }),
 };
